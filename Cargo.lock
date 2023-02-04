@@ -388,6 +388,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "middleware"
+version = "0.1.0"
+dependencies = [
+ "rodio",
+]
+
+[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -936,8 +943,8 @@ name = "synchro"
 version = "0.1.0"
 dependencies = [
  "client",
+ "middleware",
  "protocol",
- "rodio",
  "server",
  "tui 0.1.0",
 ]
