@@ -1,0 +1,15 @@
+[package]
+name = "synchro"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "synchro"
+
+[dependencies]
+protocol = {path = "protocol"}
+server = {path = "server"}
+client = {path = "client"}
+tui = {path = "tui"}
+
+rodio = "0.16.0"
