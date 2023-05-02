@@ -1,5 +1,5 @@
-#include "input/fifo.h"
-#include "input/common.h"
+#include "fifo.h"
+#include "common.h"
 
 #include <time.h>
 

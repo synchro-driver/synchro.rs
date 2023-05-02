@@ -1,5 +1,5 @@
-#include "input/sndio.h"
-#include "input/common.h"
+#include "sndio.h"
+#include "common.h"
 
 #include <sndio.h>
 

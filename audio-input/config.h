@@ -75,7 +75,9 @@ enum xaxis_scale { NONE, FREQUENCY, NOTE };
 enum orientation { ORIENT_BOTTOM, ORIENT_TOP, ORIENT_LEFT, ORIENT_RIGHT };
 
 struct config_params {
-    char *raw_target, *audio_source, *data_format;
+    char *color, *bcolor, *raw_target, *audio_source,
+        /**gradient_color_1, *gradient_color_2,*/ **gradient_colors, *data_format, *vertex_shader,
+        *fragment_shader;
 
     char bar_delim, frame_delim;
     double monstercat, integral, gravity, ignore, sens, noise_reduction;

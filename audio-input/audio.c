@@ -185,18 +185,18 @@ struct audio_out audio_fetch() {
     pthread_mutex_unlock(&audio.lock);
     debug("got format: %d and rate %d\n", audio.format, audio.rate);
 
-    audio_buffer->stream = (double *) malloc(audio.input_buffer_size * sizeof(double));
+    audio_buffer.stream = (double *) malloc(audio.input_buffer_size * sizeof(double));
     for(int i = 0; i < audio.input_buffer_size; i++)
         audio_buffer.stream[i] = audio.cava_in[i];
 
     audio_buffer.format = audio.format;
     audio_buffer.rate = audio.rate;
     audio_buffer.channels = audio_buffer.channels;
-    audio_buffer->source = (char *) malloc(128 * sizeof(char));
+    audio_buffer.source = (char *) malloc(128 * sizeof(char));
     audio_buffer.sample_counter = audio.samples_counter;
 
     while(audio.source != NULL)
-        audio.buffer.source = audio.source;
+        audio_buffer.source = audio.source;
 
     audio_buffer.im = audio_buffer.im;
     for(int i = 0; i < 1024; i++)
