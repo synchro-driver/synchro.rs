@@ -6,8 +6,10 @@ extern "C" {
 }
 
 #[derive(Debug)]
+#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct audio_data {
-    stream: f64,
+    stream: *mut f64,
     buffer_size: i32,
 
     format: i32,
