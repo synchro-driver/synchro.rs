@@ -43,11 +43,12 @@ A custom protocol will be used to swnd the data over to the client systems by th
 ## Compile Instructions
 
 + Use `cargo` to compile and run the Rust executable
++ Change the absolute path in `audio-input/CMakeLists.txt` `install` field `/home/{path}/synchro.rs/audio-input/bin`
 + `audio-input` contains input methods for extracting audio. To compile it:
   + Identify the audio service running on your device
   + Check if the service is supported by the input methods
   + These are the suppoted methhods
-    ```
+    ```[README.md](README.md)
         + alsa
         + pulseaudio
         + portaudio
