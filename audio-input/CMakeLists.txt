@@ -8,6 +8,6 @@ add_library(
             audio.c
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE audio-dependencies)
+target_link_libraries(${PROJECT_NAME} PUBLIC audio-dependencies)
 
-install(TARGETS audioinput DESTINATION ./bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION /home/cyberflaw/code/user/synchro.rs/audio-input/bin)
