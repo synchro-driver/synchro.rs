@@ -1,6 +1,7 @@
 use std::os::raw::{c_char, c_float, c_int, c_uint};
 
-#[link(name = "audioinput")]
+// uncomment the link for linking the extern function
+// #[link(name = "audioinput", kind = "static")]
 extern "C" {
     fn audio_fetch() -> audio_data;
 }
@@ -15,16 +16,15 @@ pub struct audio_data {
    format: c_int,
     rate: c_uint,
     channels: c_uint,
-    source: c_char,
-    im: c_int,
+    source: *mut c_char,
+    im: c_int,                               // input method
     error_messaage: [c_char; 1024],
     sample_counter: c_int,
 }
 
 impl audio_data {
     pub fn fetch_audio() -> Result<audio_data, ()>{
-        let audio_frame: audio_data = unsafe { audio_fetch() };
-        println!("{:?}", audio_frame);
+        let audio_frame= unsafe { audio_fetch() };
 
         match audio_frame.buffer_size {
             -1 => Err(()),
