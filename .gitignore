@@ -1,4 +1,6 @@
 /target
 .vscode
 .idea
+runtime.log
+/audio-input/build
 /audio-input/bin
