@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaudioinput.a CMakeFiles/audioinput.dir/audio.c.o
+/usr/bin/ranlib libaudioinput.a

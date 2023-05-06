@@ -39,25 +39,3 @@ A custom protocol will be used to swnd the data over to the client systems by th
 + Dont push src/main.rs without concent 
 
 + If any crates need to be added into the project ask me directly or make sure noone is working on that purticular lib
-
-## Compile Instructions
-
-+ Use `cargo` to compile and run the Rust executable
-+ Change the absolute path in `audio-input/CMakeLists.txt` `install` field `/home/{path}/synchro.rs/audio-input/bin`
-+ `audio-input` contains input methods for extracting audio. To compile it:
-  + Identify the audio service running on your device
-  + Check if the service is supported by the input methods
-  + These are the suppoted methhods
-    ```[README.md](README.md)
-        + alsa
-        + pulseaudio
-        + portaudio
-        + sndio
-        + winscpa
-        + fifo
-    ```
-  + Find the CMakeLists.txt in `audio-input/input` 
-  + Add the corresponding `.c` file into `add_library()`
-  + Go to `../bin` 
-  + Run `cmake ..` for producing the make file
-  + Follow it by `make` to compile the files and generate the static lib

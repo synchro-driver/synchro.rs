@@ -1,0 +1,31 @@
+CMAKE_TOOLCHAIN_FILE_x86_64-unknown-linux-gnu = None
+CMAKE_TOOLCHAIN_FILE_x86_64_unknown_linux_gnu = None
+HOST_CMAKE_TOOLCHAIN_FILE = None
+CMAKE_TOOLCHAIN_FILE = None
+CMAKE_GENERATOR_x86_64-unknown-linux-gnu = None
+CMAKE_GENERATOR_x86_64_unknown_linux_gnu = None
+HOST_CMAKE_GENERATOR = None
+CMAKE_GENERATOR = None
+CMAKE_PREFIX_PATH_x86_64-unknown-linux-gnu = None
+CMAKE_PREFIX_PATH_x86_64_unknown_linux_gnu = None
+HOST_CMAKE_PREFIX_PATH = None
+CMAKE_PREFIX_PATH = None
+CMAKE_x86_64-unknown-linux-gnu = None
+CMAKE_x86_64_unknown_linux_gnu = None
+HOST_CMAKE = None
+CMAKE = None
+running: "cmake" "/home/cyberflaw/code/user/ssh/synchro.rs/audio-input" "-DCMAKE_INSTALL_PREFIX=/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out" "-DCMAKE_C_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_C_COMPILER=/usr/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_CXX_COMPILER=/usr/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC -m64" "-DCMAKE_ASM_COMPILER=/usr/bin/cc" "-DCMAKE_BUILD_TYPE=Debug"
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build
+running: "cmake" "--build" "." "--target" "install" "--config" "Debug"
+[ 66%] Built target audio-dependencies
+[100%] Built target audioinput
+Install the project...
+-- Install configuration: "Debug"
+-- Up-to-date: /home/cyberflaw/code/user/synchro.rs/audio-input/bin/libaudioinput.a
+cargo:root=/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out
+cargo:rustc-link-search=native=/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/bin
+cargo:rustc-link-search=native=/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build
+cargo:rustc-link-lib=static=audioinput
+cargo:rerun-if-changed=audio-input/audio.c

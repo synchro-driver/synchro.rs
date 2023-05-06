@@ -1,0 +1,1 @@
+/home/cyberflaw/code/user/synchro.rs/audio-input/bin/libaudioinput.a
