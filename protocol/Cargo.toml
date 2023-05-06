@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 serde = "0.9.0-rc2"
 zvariant = "3.10.0"
-rodio = "0.16.0"
+
