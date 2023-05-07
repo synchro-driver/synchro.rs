@@ -1,26 +1,39 @@
 use crate::raw;
 
-pub fn initialize_audio_paramters(config: &mut raw::AlsaConfig) {
-    // implement pcm clone if needed
-    let pcm = raw::AlsaConfig::open_capture_device(config.source.clone());
+pub fn set_alsa_config(
+    source: &str,
+    channel: u32,
+    sample_rate: u32,
+    frame_size: i64,
+) -> raw::AlsaConfig {
+    raw::AlsaConfig::new(source, channel, sample_rate, frame_size)
+}
 
-    let mut stream = raw::AlsaStream {
-        stream: raw::AlsaConfig::open_stream_buffer(),
-        pcm: raw::AlsaConfig::open_capture_device(config.source.clone()),
-        hw: raw::AlsaConfig::open_hardware_config(&pcm),
-    };
+pub fn set_alsa_stream(source: &str) -> raw::AlsaStream {
+    raw::AlsaStream::new(source)
+}
 
-    raw::AlsaStream::set_hardware_config(&mut stream, config);
+pub fn initialize_audio_paramters(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream) {
+    let hw = raw::AlsaStream::open_hardware_config(&stream);
 
-    raw::AlsaStream::attach_config_to_capture(&stream);
+    raw::AlsaStream::set_hardware_config(&hw, config);
 
-    let actual_format = raw::AlsaStream::get_audio_format(stream.hw.clone());
-    let actual_rate = raw::AlsaStream::get_audio_rate(stream.hw.clone());
-    let actual_period_size = raw::AlsaStream::get_period_size(stream.hw.clone());
+    raw::AlsaStream::attach_config_to_capture(&stream, &hw);
+
+    let actual_format = raw::AlsaStream::get_audio_format(hw.clone());
+    let actual_rate = raw::AlsaStream::get_audio_rate(hw.clone());
+    let actual_period_size = raw::AlsaStream::get_period_size(hw.clone());
 
     config.format = actual_format;
     config.sample_rate = actual_rate;
     config.frame_size = actual_period_size;
 }
 
-pub fn thread_hijack() {}
+pub fn io_read_thread_hijack(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream) {
+    initialize_audio_paramters(config, stream);
+
+    let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
+
+    // check for the termination condition
+    // while true {}
+}
