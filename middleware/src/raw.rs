@@ -7,41 +7,34 @@ use alsa::{Direction, ValueOr};
 #[derive(Debug)]
 pub struct AlsaConfig {
     pub source: CString,
-    pub format: u8,
+    pub format: Format,
     pub channel: u32,
     pub sample_rate: u32,
-    pub frames: i64,
+    pub frame_size: i64,
 }
 
 impl AlsaConfig {
     // TODO: handle unwrap
-    pub fn new(
-        source: &str,
-        format: u8,
-        channel: u32,
-        sample_rate: u32,
-        frames: i64,
-    ) -> AlsaConfig {
+    pub fn new(source: &str, channel: u32, sample_rate: u32, frame_size: i64) -> AlsaConfig {
         let config: AlsaConfig = AlsaConfig {
             source: CString::new(source).unwrap(),
-            format,
+            format: Format::S16LE,
             channel,
             sample_rate,
-            frames,
+            frame_size,
         };
 
         config
     }
-}
 
-pub struct AlsaStream {
-    pub stream: *mut [f64],
-    pub pcm: PCM,
-}
+    pub fn open_stream_buffer() -> [f64; 1024] {
+        let buffer = [0.0f64; 1024];
 
-impl AlsaStream {
-    pub fn open_capture_device(source: &str) -> PCM {
-        let pcm = PCM::new(source, Direction::Capture, false).unwrap();
+        buffer
+    }
+
+    pub fn open_capture_device(source: CString) -> PCM {
+        let pcm = PCM::new(source.to_str().unwrap(), Direction::Capture, false).unwrap();
 
         pcm
     }
@@ -51,18 +44,30 @@ impl AlsaStream {
 
         hwp
     }
+}
 
-    pub fn set_hardware_config(hwp: &mut HwParams, config: AlsaConfig) {
-        hwp.set_channels(config.channel).unwrap();
-        hwp.set_rate(config.sample_rate, ValueOr::Nearest).unwrap();
-        hwp.set_format(Format::S16LE).unwrap();
-        hwp.set_access(Access::RWInterleaved).unwrap();
-        hwp.set_period_size_near(config.frames, ValueOr::Nearest)
+pub struct AlsaStream<'a> {
+    // Default size of frame is 1024
+    pub stream: [f64; 1024],
+    pub pcm: PCM,
+    pub hw: HwParams<'a>,
+}
+
+impl AlsaStream<'_> {
+    pub fn set_hardware_config(&mut self, config: &mut AlsaConfig) {
+        self.hw.set_channels(config.channel).unwrap();
+        self.hw
+            .set_rate(config.sample_rate, ValueOr::Nearest)
+            .unwrap();
+        self.hw.set_format(Format::S16LE).unwrap();
+        self.hw.set_access(Access::RWInterleaved).unwrap();
+        self.hw
+            .set_period_size_near(config.frame_size, ValueOr::Nearest)
             .unwrap();
     }
 
-    pub fn attach_config_to_capture(hwp: &HwParams, pcm: &PCM) {
-        pcm.hw_params(&hwp).unwrap();
+    pub fn attach_config_to_capture(&self) {
+        self.pcm.hw_params(&self.hw).unwrap();
     }
 
     pub fn get_transfer_size(pcm: PCM) -> (u64, u64) {
@@ -73,13 +78,21 @@ impl AlsaStream {
         let io_handler = pcm.io_f64().unwrap();
 
         match io_handler.readi(stream) {
-            Ok(bytes) => {
-                println!("{} transfered", bytes)
-            }
+            Ok(bytes) => println!("{} bytes read", bytes),
             Err(_) => {
+                eprintln!("Overflow Occured");
                 pcm.prepare().unwrap();
             }
         };
+    }
+
+    pub fn write_to_io(stream: &mut [f64], pcm: PCM) {
+        let io_handler = pcm.io_f64().unwrap();
+
+        match io_handler.writei(stream) {
+            Ok(bytes) => println!("{} bytes flushed to IO", bytes),
+            Err(_) => eprintln!("Flush Failed!"),
+        }
     }
 
     pub fn close_capture_device(pcm: PCM) {
