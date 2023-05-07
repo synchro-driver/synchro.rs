@@ -29,11 +29,19 @@ pub fn initialize_audio_paramters(config: &mut raw::AlsaConfig, stream: &mut raw
     config.frame_size = actual_period_size;
 }
 
-pub fn io_read_thread_hijack(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream) {
+pub fn io_read_thread_hijack(
+    config: &mut raw::AlsaConfig,
+    stream: &mut raw::AlsaStream,
+    terminate: bool,
+) {
     initialize_audio_paramters(config, stream);
 
     let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
 
     // check for the termination condition
-    // while true {}
+    while !terminate {
+        raw::AlsaStream::read_from_io(stream);
+
+        // write to protocol buffer
+    }
 }
