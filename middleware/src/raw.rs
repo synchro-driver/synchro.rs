@@ -26,9 +26,24 @@ impl AlsaConfig {
 
         config
     }
+}
 
-    pub fn open_stream_buffer() -> [f64; 1024] {
-        let buffer = [0.0f64; 1024];
+pub struct AlsaStream {
+    // Default size of frame is 1024
+    pub stream: &'static mut [f64],
+    pub pcm: PCM,
+}
+
+impl AlsaStream {
+    pub fn new(soure: &str) -> AlsaStream {
+        AlsaStream {
+            stream: Self::open_stream_buffer(),
+            pcm: Self::open_capture_device(CString::new(soure).unwrap()),
+        }
+    }
+
+    pub fn open_stream_buffer() -> &'static mut [f64] {
+        let buffer: &mut [f64] = &mut [];
 
         buffer
     }
@@ -39,57 +54,41 @@ impl AlsaConfig {
         pcm
     }
 
-    pub fn open_hardware_config(pcm: &PCM) -> HwParams {
-        let hwp = HwParams::any(&pcm).unwrap();
+    pub fn open_hardware_config<'a>(stream: &'a AlsaStream) -> HwParams<'a> {
+        let hw = HwParams::any(&stream.pcm).unwrap();
 
-        hwp
+        hw
     }
-}
 
-pub struct AlsaStream<'a> {
-    // Default size of frame is 1024
-    pub stream: [f64; 1024],
-    pub pcm: PCM,
-    pub hw: HwParams<'a>,
-}
-
-impl AlsaStream<'_> {
-    pub fn set_hardware_config(&mut self, config: &mut AlsaConfig) {
-        self.hw.set_channels(config.channel).unwrap();
-        self.hw
-            .set_rate(config.sample_rate, ValueOr::Nearest)
-            .unwrap();
-        self.hw.set_format(Format::S16LE).unwrap();
-        self.hw.set_access(Access::RWInterleaved).unwrap();
-        self.hw
-            .set_period_size_near(config.frame_size, ValueOr::Nearest)
+    pub fn set_hardware_config(hw: &HwParams, config: &mut AlsaConfig) {
+        hw.set_channels(config.channel).unwrap();
+        hw.set_rate(config.sample_rate, ValueOr::Nearest).unwrap();
+        hw.set_format(Format::S16LE).unwrap();
+        hw.set_access(Access::RWInterleaved).unwrap();
+        hw.set_period_size_near(config.frame_size, ValueOr::Nearest)
             .unwrap();
     }
 
-    pub fn attach_config_to_capture(&self) {
-        self.pcm.hw_params(&self.hw).unwrap();
+    pub fn attach_config_to_capture(&self, hw: &HwParams) {
+        self.pcm.hw_params(&hw).unwrap();
     }
 
-    pub fn get_transfer_size(pcm: PCM) -> (u64, u64) {
-        pcm.get_params().unwrap()
-    }
+    pub fn read_from_io(&mut self) {
+        let io_handler = self.pcm.io_f64().unwrap();
 
-    pub fn read_from_io(stream: &mut [f64], pcm: PCM) {
-        let io_handler = pcm.io_f64().unwrap();
-
-        match io_handler.readi(stream) {
+        match io_handler.readi(self.stream) {
             Ok(bytes) => println!("{} bytes read", bytes),
             Err(_) => {
                 eprintln!("Overflow Occured");
-                pcm.prepare().unwrap();
+                self.pcm.prepare().unwrap();
             }
         };
     }
 
-    pub fn write_to_io(stream: &mut [f64], pcm: PCM) {
-        let io_handler = pcm.io_f64().unwrap();
+    pub fn write_to_io(&self) {
+        let io_handler = self.pcm.io_f64().unwrap();
 
-        match io_handler.writei(stream) {
+        match io_handler.writei(self.stream) {
             Ok(bytes) => println!("{} bytes flushed to IO", bytes),
             Err(_) => eprintln!("Flush Failed!"),
         }
@@ -97,6 +96,10 @@ impl AlsaStream<'_> {
 
     pub fn close_capture_device(pcm: PCM) {
         pcm.drop().unwrap();
+    }
+
+    pub fn get_transfer_size(&self) -> (u64, u64) {
+        self.pcm.get_params().unwrap()
     }
 
     // use these for fetching the data for Protocol
