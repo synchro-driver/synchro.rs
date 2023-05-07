@@ -36,7 +36,7 @@ pub fn io_read_thread_hijack(
 ) {
     initialize_audio_paramters(config, stream);
 
-    let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
+    // let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
 
     // check for the termination condition
     while !terminate {
