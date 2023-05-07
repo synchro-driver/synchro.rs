@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaudio-dependencies.a "CMakeFiles/audio-dependencies.dir/alsa.c.o" "CMakeFiles/audio-dependencies.dir/common.c.o" "CMakeFiles/audio-dependencies.dir/pulse.c.o"
+/usr/bin/ranlib libaudio-dependencies.a
