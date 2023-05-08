@@ -1,4 +1,4 @@
 target
-./middleware/target/
+middleware/target
 .vscode
 .idea

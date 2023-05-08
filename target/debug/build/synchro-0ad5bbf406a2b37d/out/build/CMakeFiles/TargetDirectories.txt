@@ -1,0 +1,14 @@
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/audioinput.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/edit_cache.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/rebuild_cache.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/list_install_components.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/install.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/install/local.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/CMakeFiles/install/strip.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/audio-dependencies.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/edit_cache.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/rebuild_cache.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/list_install_components.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/install.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/install/local.dir
+/home/cyberflaw/code/user/ssh/synchro.rs/target/debug/build/synchro-0ad5bbf406a2b37d/out/build/input/CMakeFiles/install/strip.dir

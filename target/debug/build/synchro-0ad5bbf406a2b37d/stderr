@@ -1,0 +1,12 @@
+CMake Warning at input/CMakeLists.txt:9 (target_link_libraries):
+  Target "audioinput" requests linking to directory
+  "/home/cyberflaw/code/user/ssh/synchro.rs/audio-input/input".  Targets may
+  link only to libraries.  CMake is dropping the item.
+
+
+CMake Warning at input/CMakeLists.txt:9 (target_link_libraries):
+  Target "audio-dependencies" requests linking to directory
+  "/home/cyberflaw/code/user/ssh/synchro.rs/audio-input/input".  Targets may
+  link only to libraries.  CMake is dropping the item.
+
+
