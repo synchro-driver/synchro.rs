@@ -1,0 +1,39 @@
+// extern crate protocol;
+extern crate server;
+// extern crate client;
+// extern crate middleware;
+
+use server::{client, host};
+use std::io;
+
+fn main() {
+    println!("Synchro Studio 🎵");
+
+    println!("To start a host enter 1");
+    println!("To connect to a host enter 2");
+    println!("Enter selection :");
+
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    let inp_num = match input.trim().parse::<i32>() {
+        Ok(x) => x,
+        Err(_) => 0,
+    };
+
+    if inp_num == 1 {
+        host::start();
+    } else if inp_num == 2 {
+        client::start();
+    } else {
+        println!("Invalid input")
+    }
+
+    // let test_packet: protocol::audiodata::audio_data;
+    // test_packet = protocol::audiodata::audio_data::fetch_audio().unwrap();
+    //
+    // println!("{:?}", test_packet);
+}
