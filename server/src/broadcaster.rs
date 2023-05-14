@@ -13,16 +13,14 @@ struct Packet {
 }
 
 #[tokio::main]
-pub async fn start() {
-    const PORT: i32 = 8000;
+pub async fn start(port: u16, capacity: usize) {
+    println!("Starting as a host at port {}", port);
 
-    println!("Starting as a host at port {}", PORT);
-
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", PORT))
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
         .await
         .unwrap();
 
-    let (tx, _rx) = broadcast::channel(100);
+    let (tx, _rx) = broadcast::channel(capacity);
 
     loop {
         let (mut socket, addr) = listener.accept().await.unwrap();
