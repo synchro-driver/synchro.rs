@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-zvariant = "3.10.0"
+rmp-serde = "1.1.1"
 alsa = "0.7"
