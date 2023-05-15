@@ -3,9 +3,10 @@ use serde::{Deserialize, Serialize};
 
 // Set Format as pcm::Format::S16LE in reciver side
 #[derive(Serialize, Deserialize)]
-pub struct Handshake<'a> {
+pub struct Handshake {
     pub buffer_size: u16,
-    pub source: &'a str,
+    // pub source: &'a str,
+    pub source: String,
     pub rate: u32,
     pub channels: u32,
     pub timestamp: u64,
@@ -38,10 +39,10 @@ pub struct StreamControl {
 
 // TODO: Handle deserialize code inside impl blocks
 
-impl Handshake<'_> {
+impl Handshake {
     pub fn new(
         buffer_size: u16,
-        source: &str,
+        source: String,
         rate: u32,
         channels: u32,
         timestamp: u64,
@@ -64,6 +65,13 @@ impl Handshake<'_> {
             }
         }
     }
+
+    pub fn deserialize(buffer: Vec<u8>) -> Self {
+        match rmp_serde::from_slice(&buffer) {
+            Ok(val) => val,
+            Err(_) => Self::new(0, "none".to_string(), 0, 0, 0),
+        }
+    }
 }
 
 impl HandshakeResponce {
@@ -78,6 +86,13 @@ impl HandshakeResponce {
                 println!("serialization failed");
                 Vec::new()
             }
+        }
+    }
+
+    pub fn deserialize(buffer: Vec<u8>) -> Self {
+        match rmp_serde::from_slice(&buffer) {
+            Ok(val) => val,
+            Err(_) => Self::new(0),
         }
     }
 }
@@ -100,6 +115,12 @@ impl Stream {
             }
         }
     }
+    pub fn deserialize(buffer: Vec<u8>) -> Self {
+        match rmp_serde::from_slice(&buffer) {
+            Ok(val) => val,
+            Err(_) => Self::new(0, 0, &[]),
+        }
+    }
 }
 
 impl StreamControl {
@@ -114,6 +135,13 @@ impl StreamControl {
                 println!("serialization failed");
                 Vec::new()
             }
+        }
+    }
+
+    pub fn deserialize(buffer: Vec<u8>) -> Self {
+        match rmp_serde::from_slice(&buffer) {
+            Ok(val) => val,
+            Err(_) => Self::new(false),
         }
     }
 }
