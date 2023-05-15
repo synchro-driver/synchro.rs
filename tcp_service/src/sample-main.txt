@@ -1,10 +1,9 @@
-// extern crate protocol;
-extern crate server;
-// extern crate client;
-// extern crate middleware;
+extern crate middleware;
+extern crate protocol;
+extern crate tcp_service;
 
-use server::{broadcaster, client, host};
 use std::{io, thread, time::Duration};
+use tcp_service::{broadcaster, client, host};
 
 fn main() {
     println!("Synchro Studio 🎵");
@@ -26,13 +25,14 @@ fn main() {
 
     if inp_num == 1 {
         let broadcaster_thread = thread::spawn(|| {
-            broadcaster::start();
+            let host = broadcaster::Host::new("localhost".to_string(), 8000, 1000);
+            broadcaster::init(host);
         });
 
         let host_thread = thread::spawn(|| {
             // Wait for broadcaster to start
             thread::sleep(Duration::from_millis(100));
-            host::start();
+            host::broadcast_injection();
         });
 
         broadcaster_thread.join().unwrap();

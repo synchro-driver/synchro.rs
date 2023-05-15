@@ -2,8 +2,7 @@ use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
-    net::TcpListener,
-    sync::broadcast,
+    net, sync,
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -12,15 +11,31 @@ struct Packet {
     timestamp: i64,
 }
 
-#[tokio::main]
-pub async fn start(port: u16, capacity: usize) {
-    println!("Starting as a host at port {}", port);
+pub struct Host {
+    pub ip: String,
+    pub port: u16,
+    pub broadcast_capacity: usize,
+}
 
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+impl Host {
+    pub fn new(ip: String, port: u16, broadcast_capacity: usize) -> Self {
+        Self {
+            ip,
+            port,
+            broadcast_capacity,
+        }
+    }
+}
+
+#[tokio::main]
+pub async fn init(metadata: Host) {
+    println!("Starting as a host at port {}", metadata.port);
+
+    let listener = net::TcpListener::bind(format!("{}:{}", metadata.ip, metadata.port))
         .await
         .unwrap();
 
-    let (tx, _rx) = broadcast::channel(capacity);
+    let (tx, _rx) = sync::broadcast::channel(metadata.broadcast_capacity);
 
     loop {
         let (mut socket, addr) = listener.accept().await.unwrap();
@@ -44,9 +59,6 @@ pub async fn start(port: u16, capacity: usize) {
 
                         let now = Utc::now();
 
-                        // to remove \n from string
-                        trim_newline(&mut line);
-
                         let message = Packet {
                             content:line.clone(),
                             timestamp: now.timestamp_millis()
@@ -66,14 +78,5 @@ pub async fn start(port: u16, capacity: usize) {
                 }
             }
         });
-    }
-}
-
-fn trim_newline(s: &mut String) {
-    if s.ends_with('\n') {
-        s.pop();
-        if s.ends_with('\r') {
-            s.pop();
-        }
     }
 }

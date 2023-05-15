@@ -13,7 +13,7 @@ pub struct Handshake {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct HandshakeResponce {
+pub struct HandshakeResponse {
     pub latency: usize,
 }
 
@@ -36,8 +36,6 @@ pub struct Stream {
 pub struct StreamControl {
     pub alive: bool,
 }
-
-// TODO: Handle deserialize code inside impl blocks
 
 impl Handshake {
     pub fn new(
@@ -72,11 +70,15 @@ impl Handshake {
             Err(_) => Self::new(0, "none".to_string(), 0, 0, 0),
         }
     }
+
+    pub fn set_timestamp(&mut self, stamp: u64) {
+        self.timestamp = stamp;
+    }
 }
 
-impl HandshakeResponce {
+impl HandshakeResponse {
     pub fn new(latency: usize) -> Self {
-        HandshakeResponce { latency }
+        HandshakeResponse { latency }
     }
 
     pub fn serialize(&self) -> Vec<u8> {
