@@ -15,6 +15,7 @@ pub struct Handshake {
 #[derive(Serialize, Deserialize)]
 pub struct HandshakeResponse {
     pub latency: usize,
+    pub name: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -77,8 +78,8 @@ impl Handshake {
 }
 
 impl HandshakeResponse {
-    pub fn new(latency: usize) -> Self {
-        HandshakeResponse { latency }
+    pub fn new(latency: usize, name: String) -> Self {
+        HandshakeResponse { latency, name }
     }
 
     pub fn serialize(&self) -> Vec<u8> {
@@ -94,7 +95,7 @@ impl HandshakeResponse {
     pub fn deserialize(buffer: Vec<u8>) -> Self {
         match rmp_serde::from_slice(&buffer) {
             Ok(val) => val,
-            Err(_) => Self::new(0),
+            Err(_) => Self::new(0, "error".to_string()),
         }
     }
 }
@@ -128,6 +129,10 @@ impl Stream {
 impl StreamControl {
     pub fn new(state: bool) -> Self {
         StreamControl { alive: state }
+    }
+
+    pub fn kill(&mut self) {
+        self.alive = false;
     }
 
     pub fn serialize(&self) -> Vec<u8> {

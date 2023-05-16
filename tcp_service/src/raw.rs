@@ -1,12 +1,15 @@
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use tokio::net::TcpStream;
 
 pub struct Host {
     pub ip: String,
     pub port: u16,
     pub broadcast_capacity: usize,
-    pub clients: HashMap<SocketAddr, TcpStream>,
+    pub clients: Vec<SocketAddr>,
+}
+
+pub struct ClientLatencies {
+    pub clients: HashMap<SocketAddr, usize>,
 }
 
 impl Host {
@@ -15,11 +18,18 @@ impl Host {
             ip,
             port,
             broadcast_capacity,
-            clients: HashMap::new(),
+            clients: Vec::new(),
         }
     }
+}
 
-    pub fn add_clients(&mut self, client: SocketAddr, stream: TcpStream) {
-        self.clients.insert(client, stream);
+impl ClientLatencies {
+    pub fn add_clients(&mut self, client: SocketAddr) {
+        self.clients.insert(client, 0);
     }
+
+    // Fix this
+    // pub fn update_latency(&mut self, client: SocketAddr, latency: &mut usize) {
+    //     self.clients.get_mut(client).unwrap() = latency;
+    // }
 }
