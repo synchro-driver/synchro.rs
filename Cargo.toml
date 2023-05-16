@@ -8,7 +8,7 @@ name = "synchro"
 
 [dependencies]
 protocol = { path = "protocol" }
-server = { path = "server" }
+tcp-service = { path = "tcp_service" }
 tui = { path = "tui" }
 middleware = { path = "middleware" }
 
