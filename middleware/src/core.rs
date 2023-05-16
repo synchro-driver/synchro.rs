@@ -1,5 +1,6 @@
 use crate::raw;
 
+// Setup functions
 pub fn set_alsa_config(
     source: &str,
     channel: u32,
@@ -13,6 +14,7 @@ pub fn set_alsa_stream(source: &str) -> raw::AlsaStream {
     raw::AlsaStream::new(source)
 }
 
+// Helper function
 pub fn initialize_audio_paramters(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream) {
     let hw = raw::AlsaStream::open_hardware_config(&stream);
 
@@ -29,11 +31,8 @@ pub fn initialize_audio_paramters(config: &mut raw::AlsaConfig, stream: &mut raw
     config.frame_size = actual_period_size;
 }
 
-pub fn io_read_thread_hijack(
-    config: &mut raw::AlsaConfig,
-    stream: &mut raw::AlsaStream,
-    terminate: bool,
-) {
+// Entry point
+pub fn io_read(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream, terminate: bool) {
     initialize_audio_paramters(config, stream);
 
     // let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);

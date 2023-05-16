@@ -1,6 +1,9 @@
-use std::{io::Write, net::TcpStream, thread, time::Duration};
+use std::io::Write;
+use std::net::TcpStream;
+use std::thread;
+use std::time::Duration;
 
-pub fn start() {
+pub fn stream_flush() {
     let mut stream = TcpStream::connect("127.0.0.1:8000").unwrap();
     println!("Sending packets");
 
