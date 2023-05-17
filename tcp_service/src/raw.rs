@@ -1,6 +1,13 @@
 use std::collections::HashMap;
 use std::net::SocketAddr;
 
+#[derive(Debug)]
+pub enum MessageTypeIO {
+    Start,
+    Stop,
+    Err,
+}
+
 pub struct Host {
     pub ip: String,
     pub port: u16,
