@@ -169,6 +169,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "middleware"
+version = "0.1.0"
+dependencies = [
+ "alsa",
+]
+
+[[package]]
 name = "mio"
 version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -281,6 +288,7 @@ name = "protocol"
 version = "0.1.0"
 dependencies = [
  "alsa",
+ "middleware",
  "rmp-serde",
  "serde",
 ]
