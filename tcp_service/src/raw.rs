@@ -24,6 +24,12 @@ impl Host {
 }
 
 impl ClientLatencies {
+    pub fn new() -> Self {
+        Self {
+            clients: HashMap::new(),
+        }
+    }
+
     pub fn add_clients(&mut self, client: SocketAddr) {
         self.clients.insert(client, 0);
     }
