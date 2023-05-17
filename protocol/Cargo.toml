@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde = "0.9.0-rc2"
-zvariant = "3.10.0"
-rodio = "0.16.0"
+middleware = { path = "../middleware" }
+
+serde = { version = "1", features = ["derive"] }
+rmp-serde = "1.1.1"
+alsa = "0.7"
