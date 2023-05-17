@@ -1,10 +1,10 @@
-use super::protocol;
+use super::protocol_helpers;
 use super::raw::{ClientLatencies, Host};
 
 use serde::{Deserialize, Serialize};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net;
-// use tokio::sync::oneshot;
+use tokio::sync::oneshot;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Packet {
@@ -13,17 +13,31 @@ struct Packet {
 }
 
 #[tokio::main]
-pub async fn init(host: Host, clients: &mut ClientLatencies) {
+pub async fn server(host: Host, clients: &mut ClientLatencies) {
     println!("Starting as a host at port {}", host.port);
 
     let listener = net::TcpListener::bind(format!("{}:{}", host.ip, host.port))
         .await
         .unwrap();
 
+    // here oneshot is used to send a message to broadcast setup StreamReady signal
+    // broadcast is used to broadcast the stream and stream life to the clients
+
     loop {
         let (mut socket, addr) = listener.accept().await.unwrap();
-
         clients.add_clients(addr);
+
+        // used to send signal to start stream transfer
+        let (io_tx, mut io_rx) = oneshot::channel::<Vec<u8>>();
+
+        tokio::spawn(async move {
+            let mut input = String::new();
+            std::io::stdin()
+                .read_line(&mut input)
+                .expect("Failed to read line");
+
+            io_tx.send(protocol_helpers::stream_init()).unwrap();
+        });
 
         // spawn new thread to initiate protocol handshake
         tokio::spawn(async move {
@@ -31,7 +45,7 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
             let (read, mut write) = socket.split();
 
             // Here the writer should contain serilized handshake protocol
-            let tcp_writer = protocol::handshake(&mut write).await;
+            let tcp_writer = protocol_helpers::handshake(&mut write).await;
             println!("{:?}", tcp_writer);
 
             let mut tcp_reader = BufReader::new(read);
@@ -41,8 +55,19 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
             loop {
                 tokio::select! {
                     res = tcp_reader.read_line(&mut responce_buffer) => {
-                        println!("{}", res.unwrap());
+                        let message = res.unwrap();
+                        println!("{}", message);
                     }
+
+                    _ = &mut io_rx => {
+                        println!("Starting streaming");
+
+                        // send StreamControl protocol broadcast
+                    }
+
+                    // TODO
+                    // Handle responce from client
+                    // Handle io intrupt to start streamm
                 }
             }
         });
