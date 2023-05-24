@@ -6,52 +6,79 @@ use tokio::sync::{mpsc, oneshot};
 
 #[tokio::main]
 pub async fn init(host: Host, _: &mut ClientLatencies) {
-    let (io_tx, mut io_rx) = oneshot::channel::<MessageTypeIO>();
+    let (start_io_tx, mut start_io_rx) = oneshot::channel::<MessageTypeIO>();
+    let (stop_io_tx, mut stop_io_rx) = oneshot::channel::<MessageTypeIO>();
     let (client_tx, mut client_rx) = mpsc::unbounded_channel();
 
-    // This thread accepts incomming clients
-    // 1. It also sends the socket data of client to another thead to handle handshake
-    // 2. It also listens to io_rx to start stream
     println!("Starting as a host at port {}\n", host.port);
     let listener = net::TcpListener::bind(format!("{}:{}", host.ip, host.port))
         .await
         .expect("Expected server binding to port");
 
-    println!("[Usage] Type 'start' to Start streaming");
-    println!("Type 'stop' to Stop streaming [Usage] \n");
-
     // This thread waits for io input to start broadcast
     tokio::spawn(async move {
         let mut command = String::new();
-        std::io::stdin()
-            .read_line(&mut command)
-            .expect("Failed to read line");
+        let mut run = true;
+        let mut message_type = MessageTypeIO::Err;
 
-        if command == "".to_string() {
-            io_tx.send(MessageTypeIO::Start).unwrap();
-        } else if command == "stop".to_string() {
-            io_tx.send(MessageTypeIO::Stop).unwrap();
+        println!("[Usage] Type 'start' to Start streaming");
+        println!("Type 'stop' to Stop streaming [Usage] \n");
+
+        while run {
+            // replace it with string check logic
+            std::io::stdin()
+                .read_line(&mut command)
+                .expect("Failed to read line");
+
+            if command.trim() == "start" {
+                message_type = MessageTypeIO::Start;
+            } else if command.trim() == "stop" {
+                message_type = MessageTypeIO::Stop;
+            } else {
+                println!("Wrong Input!");
+            }
+            run = false;
+        }
+
+        match message_type {
+            MessageTypeIO::Start => match start_io_tx.send(MessageTypeIO::Start) {
+                Ok(_) => println!("Start message sent"),
+                Err(_) => println!("send failed"),
+            },
+            MessageTypeIO::Stop => match stop_io_tx.send(MessageTypeIO::Start) {
+                Ok(_) => println!("Stop message sent"),
+                Err(_) => println!("send failed"),
+            },
+            MessageTypeIO::Err => println!("Failed to start the broadcast"),
         }
     });
 
     // This thread handles the switching of broadcast status
     tokio::spawn(async move {
-        loop {
-            tokio::select! {
-                message = &mut io_rx => {
-                    // handle broadcase start and stop logic
-                    let status = match message {
-                        Ok(val) => val,
-                        Err(_) => MessageTypeIO::Err
-                    };
+        tokio::select! {
+            message = &mut start_io_rx => {
+                match message {
+                    Ok(val) => if let MessageTypeIO::Start = val {
+                        // add logic here
+                        println!("Start broadcast");
+                    },
+                    Err(_) => eprintln!("Error in reciving start")
+                };
 
-                    match status {
-                        MessageTypeIO::Start => println!("Start broadcast"),
-                        MessageTypeIO::Stop => println!("Stop broadcast"),
-                        MessageTypeIO::Err => eprintln!("IO error")
-                    };
-                }
             }
+        }
+
+        tokio::select! {
+            message = &mut stop_io_rx => {
+                match message {
+                    Ok(val) => if let MessageTypeIO::Stop = val {
+                        // add logic here
+                        println!("Stopping broadcast");
+                    },
+                    Err(_) => eprintln!("Error in reciving stop")
+                };
+            }
+
         }
     });
 
