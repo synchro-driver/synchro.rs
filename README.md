@@ -4,6 +4,17 @@ This is a package that can be used to synchronize the audio across all the devic
 
 A custom protocol will be used to swnd the data over to the client systems by the server. This protocol is under testing and developmen.
 
+## Protocol Discription
+
+These are the sizes of the protocol packets after serialization:
+
++ Handshake packet: 16 bytes
+
++ Handshake Responce packet: ? bytes
+
++ Broadcast packet: ? bytes
+
++ Stream control packet: ? bytes
 
 ## COMPLETED:
 

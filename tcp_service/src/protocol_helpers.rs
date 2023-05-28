@@ -7,7 +7,7 @@ pub async fn get_serialized_handshake<'a>(
     rate: u32,
     channel: u32,
     // need to update this with std::Box for dynamic header packet sizes
-    serial_buffer: &'a mut [u8; 1024],
+    serial_buffer: &'a mut [u8; 16],
 ) -> &'a [u8] {
     let mut handshake_packet = raw::Handshake::new(buffer_size, source, 0, 0, 0);
     handshake_packet.set_rate(rate);

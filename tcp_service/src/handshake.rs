@@ -97,8 +97,9 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
                     let mut responce_buffer = String::new();
 
                     // send the handshake request
-                    let mut serilized_handshake: [u8; 1024] = [0; 1024];
-                     let serilized_handshake = get_serialized_handshake(1024, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
+                    let mut serilized_handshake: [u8; 16] = [0; 16];
+                    let serilized_handshake = get_serialized_handshake(64, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
+                    println!("serilized_handshake: {:?}", serilized_handshake);
                     match write.ready(tokio::io::Interest::WRITABLE).await {
                         Ok(_) => {
                             let mut write_buffer = BufWriter::new(write);
