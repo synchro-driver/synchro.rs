@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct Handshake {
     pub buffer_size: u16,
-    // pub source: &'a str,
     pub source: String,
     pub rate: u32,
     pub channels: u32,
@@ -74,6 +73,14 @@ impl Handshake {
 
     pub fn set_timestamp(&mut self, stamp: u64) {
         self.timestamp = stamp;
+    }
+
+    pub fn set_rate(&mut self, rate: u32) {
+        self.rate = rate;
+    }
+
+    pub fn set_channels(&mut self, channels: u32) {
+        self.channels = channels;
     }
 }
 

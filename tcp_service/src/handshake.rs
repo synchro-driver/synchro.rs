@@ -1,14 +1,15 @@
+use super::protocol_helpers::get_serialized_handshake;
 use super::raw::{ClientLatencies, Host, MessageTypeIO};
 
-// use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncWriteExt, BufWriter};
 use tokio::net;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::oneshot;
 
 #[tokio::main]
-pub async fn init(host: Host, _: &mut ClientLatencies) {
+pub async fn init(host: Host, clients: &mut ClientLatencies) {
     let (start_io_tx, mut start_io_rx) = oneshot::channel::<MessageTypeIO>();
-    let (stop_io_tx, mut stop_io_rx) = oneshot::channel::<MessageTypeIO>();
-    let (client_tx, mut client_rx) = mpsc::unbounded_channel();
+    let (stop_io_tx, _) = oneshot::channel::<MessageTypeIO>();
 
     println!("Starting as a host at port {}\n", host.port);
     let listener = net::TcpListener::bind(format!("{}:{}", host.ip, host.port))
@@ -25,7 +26,6 @@ pub async fn init(host: Host, _: &mut ClientLatencies) {
         println!("Type 'stop' to Stop streaming [Usage] \n");
 
         while run {
-            // replace it with string check logic
             std::io::stdin()
                 .read_line(&mut command)
                 .expect("Failed to read line");
@@ -68,29 +68,58 @@ pub async fn init(host: Host, _: &mut ClientLatencies) {
             }
         }
 
-        tokio::select! {
-            message = &mut stop_io_rx => {
-                match message {
-                    Ok(val) => if let MessageTypeIO::Stop = val {
-                        // add logic here
-                        println!("Stopping broadcast");
-                    },
-                    Err(_) => eprintln!("Error in reciving stop")
-                };
-            }
-
-        }
+        // Uncomment after stop logic is implemented
+        // tokio::select! {
+        //     message = &mut stop_io_rx => {
+        //         match message {
+        //             Ok(val) => if let MessageTypeIO::Stop = val {
+        //                 // add logic here
+        //                 println!("Stopping broadcast");
+        //             },
+        //             Err(_) => eprintln!("Error in reciving stop")
+        //         };
+        //     }
+        // }
     });
 
     loop {
         tokio::select! {
             client = listener.accept() => {
-                println!("new client");
-                let (socket, _) = client.unwrap();
-                // clients.add_clients(addr);
+                println!("New client joined");
 
-                client_tx.send(socket).unwrap();
-            }
+                let (mut socket, addr) = client.unwrap();
+                clients.add_clients(addr);
+
+                // This thread handles handshaking with client
+                tokio::spawn(async move {
+                    let (read, write) = socket.split();
+                    let mut tcp_reader = BufReader::new(read);
+                    let mut responce_buffer = String::new();
+
+                    // send the handshake request
+                    let mut serilized_handshake: [u8; 1024] = [0; 1024];
+                     let serilized_handshake = get_serialized_handshake(1024, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
+                    match write.ready(tokio::io::Interest::WRITABLE).await {
+                        Ok(_) => {
+                            let mut write_buffer = BufWriter::new(write);
+                            write_buffer.write_all(serilized_handshake).await.unwrap();
+                            println!("Send handshake");
+                        },
+                        Err(_) => {
+                            // implemented retry logic
+                            eprintln!("Handshake send broke...");
+                        }
+                    }
+
+                    // accept handshake responce
+                    tokio::select! {
+                        res = tcp_reader.read_line(&mut responce_buffer) => {
+                            let message = res.unwrap();
+                            println!("{}", message);
+                        }
+                    }
+                });
+                }
 
             // TODO
             // Handle responce from client
@@ -98,22 +127,6 @@ pub async fn init(host: Host, _: &mut ClientLatencies) {
 
         }
     }
-
-    // This thread handles handshaking with client
-    // tokio::spawn(async move {
-    //     let (read, mut write) = client_rx.recv().await.unwrap().split();
-    //     let mut tcp_reader = BufReader::new(read);
-    //     let mut responce_buffer = String::new();
-    //
-    //     loop {
-    //         tokio::select! {
-    //             res = tcp_reader.read_line(&mut responce_buffer) => {
-    //                 let message = res.unwrap();
-    //                 println!("{}", message);
-    //             }
-    //         }
-    //     }
-    // });
 
     // let (tx, _rx) = sync::broadcast::channel(host.broadcast_capacity);
     // let tx = tx.clone();

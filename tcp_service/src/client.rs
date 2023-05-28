@@ -1,12 +1,5 @@
-use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
-
-#[derive(Serialize, Deserialize)]
-struct Packet {
-    content: String,
-    timestamp: i64,
-}
 
 pub fn start() {
     let stream = TcpStream::connect("127.0.0.1:8000").unwrap();
@@ -25,10 +18,5 @@ pub fn start() {
         }
 
         // Deserialize the packet message
-        let packet: Packet = serde_json::from_str(&buffer).unwrap();
-        println!(
-            "Packet {} from server at timestamp: {}",
-            packet.content, packet.timestamp
-        );
     }
 }
