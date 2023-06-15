@@ -32,7 +32,7 @@ pub fn handshake() {
         }
 
         // deseraialize
-        let handshake = deserialize_handshake(buffer);
+        let handshake = deserialize_handshake(&stream);
         println!("Deser buff: {:?}", handshake);
     }
 }

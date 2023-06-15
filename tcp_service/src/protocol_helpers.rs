@@ -18,7 +18,6 @@ pub async fn get_serialized_handshake<'a>(
     }
 
     let hand = raw::Handshake::default();
-    hand.deserialize(serial_buffer.to_vec());
     println!("deser: {:?}", hand);
     serial_buffer
 }
