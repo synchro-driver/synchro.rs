@@ -1,8 +1,8 @@
 use super::protocol_helpers::get_serialized_handshake;
 use super::raw::{ClientLatencies, Host, MessageTypeIO};
 
-use tokio::io::AsyncWriteExt;
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::BufReader;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net;
 use tokio::sync::oneshot;
 
@@ -93,7 +93,7 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
                 tokio::spawn(async move {
                     let (read, mut write) = socket.split();
                     let mut tcp_reader = BufReader::new(read);
-                    let mut responce_buffer = String::new();
+                    let mut responce_buffer = [0u8; 16];
 
                     // send the handshake request
                     let mut serilized_handshake = [0u8; 16];
@@ -117,9 +117,15 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
 
                     // accept handshake responce
                     tokio::select! {
-                        res = tcp_reader.read_line(&mut responce_buffer) => {
-                            let message = res.unwrap();
-                            println!("{}", message);
+                        res = tcp_reader.read(&mut responce_buffer) => {
+                            match res {
+                                Ok(_) => println!("Handshake responce sent"),
+                                Err(err) =>
+                                    println!("Handshake responce failed: {}", err),
+
+                            };
+
+                            println!("buffer: {:?}", responce_buffer);
                         }
                     }
                 });

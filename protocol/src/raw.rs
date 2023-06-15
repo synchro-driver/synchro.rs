@@ -132,32 +132,14 @@ impl HandshakeResponse {
                 Vec::new()
             }
         }
-
-        // JSON
-        // match serde_json::to_vec(&self) {
-        //     Ok(val) => val,
-        //     Err(_) => {
-        //         println!("serialization failed");
-        //         Vec::new()
-        //     }
-        // }
     }
 
     pub fn deserialize(buffer: Vec<u8>) -> Self {
         // MessagePack
-        match rmp_serde::from_slice(&buffer) {
+        match rmp_serde::from_slice::<Self>(&buffer) {
             Ok(val) => val,
             Err(_) => Self::new(0, "error".to_string()),
         }
-
-        // JSON
-        // match serde_json::from_slice(&buffer) {
-        //     Ok(val) => val,
-        //     Err(err) => {
-        //         eprintln!("Failed to deserialize: {}", err);
-        //         Self::default()
-        //     }
-        // }
     }
 }
 
@@ -187,31 +169,13 @@ impl Stream {
                 Vec::new()
             }
         }
-
-        // JSON
-        // match serde_json::to_vec(&self) {
-        //     Ok(val) => val,
-        //     Err(_) => {
-        //         println!("serialization failed");
-        //         Vec::new()
-        //     }
-        // }
     }
     pub fn deserialize(buffer: Vec<u8>) -> Self {
         // MessagePack
-        match rmp_serde::from_slice(&buffer) {
+        match rmp_serde::from_slice::<Self>(&buffer) {
             Ok(val) => val,
             Err(_) => Self::new(0, 0, &[]),
         }
-
-        // JSON
-        // match serde_json::from_slice(&buffer) {
-        //     Ok(val) => val,
-        //     Err(err) => {
-        //         eprintln!("Failed to deserialize: {}", err);
-        //         Self::default()
-        //     }
-        // }
     }
 }
 

@@ -29,7 +29,13 @@ fn main() {
 
         host::init(host, &mut client_latencies);
     } else if inp_num == 2 {
-        client::handshake();
+        let mut client_name = String::new();
+        println!("Enter client name: ");
+        io::stdin()
+            .read_line(&mut client_name)
+            .expect("Failed to get client name");
+
+        client::handshake(client_name.trim().to_string());
     } else {
         println!("Invalid input")
     }
