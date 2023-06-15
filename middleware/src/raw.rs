@@ -30,7 +30,7 @@ impl AlsaConfig {
 
 pub struct AlsaStream {
     // Default size of frame is 1024
-    pub stream: &'static mut [f64],
+    pub stream: [u8; 1024],
     pub pcm: PCM,
 }
 
@@ -42,8 +42,8 @@ impl AlsaStream {
         }
     }
 
-    pub fn open_stream_buffer() -> &'static mut [f64] {
-        let buffer: &mut [f64] = &mut [];
+    pub fn open_stream_buffer() -> [u8; 1024] {
+        let buffer = [0u8; 1024];
 
         buffer
     }
@@ -74,9 +74,9 @@ impl AlsaStream {
     }
 
     pub fn read_from_io(&mut self) {
-        let io_handler = self.pcm.io_f64().unwrap();
+        let io_handler = self.pcm.io_bytes();
 
-        match io_handler.readi(self.stream) {
+        match io_handler.readi(&mut self.stream) {
             Ok(bytes) => println!("{} bytes read", bytes),
             Err(_) => {
                 eprintln!("Overflow Occured");
@@ -85,10 +85,10 @@ impl AlsaStream {
         };
     }
 
-    pub fn write_to_io(&self) {
-        let io_handler = self.pcm.io_f64().unwrap();
+    pub fn write_to_io(&mut self) {
+        let io_handler = self.pcm.io_bytes();
 
-        match io_handler.writei(self.stream) {
+        match io_handler.writei(&mut self.stream) {
             Ok(bytes) => println!("{} bytes flushed to IO", bytes),
             Err(_) => eprintln!("Flush Failed!"),
         }
