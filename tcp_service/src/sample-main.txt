@@ -2,40 +2,17 @@ extern crate middleware;
 extern crate protocol;
 extern crate tcp_service;
 
-use std::{io, thread};
-// use tcp_service::raw::Host;
-use tcp_service::{client, handshake, raw};
+use std::io;
+use tcp_service::{client, host, raw};
 
 fn main() {
     println!("Synchro Studio 🎵");
 
-    println!("To start a host enter 1");
-    println!("To connect to a host enter 2");
-    println!("Enter selection :");
+    let mut config = middleware::core::set_alsa_config("default", 2, 44100, 1024);
+    // let mut stream = middleware::core::set_alsa_stream("default", false);
+    let mut stream = middleware::core::set_alsa_stream("default", true);
+    let mut terminate = false;
 
-    let mut input = String::new();
-
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-
-    let inp_num = match input.trim().parse::<i32>() {
-        Ok(x) => x,
-        Err(_) => 0,
-    };
-
-    if inp_num == 1 {
-        let broadcaster_thread = thread::spawn(|| {
-            let host = raw::Host::new("127.0.0.1".to_string(), 8000, 1000);
-            let mut client_latencies = raw::ClientLatencies::new();
-
-            handshake::init(host, &mut client_latencies);
-        });
-
-        broadcaster_thread.join().unwrap();
-    } else if inp_num == 2 {
-        client::start();
-    } else {
-        println!("Invalid input")
-    }
+    middleware::core::io_read(&mut config, &mut stream, terminate);
+    // middleware::core::io_write(&mut config, &mut stream, terminate);
 }
