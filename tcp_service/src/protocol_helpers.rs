@@ -1,4 +1,4 @@
-use protocol::raw;
+use protocol::raw::{self, Handshake, HandshakeResponse};
 
 // Used to get a buffer writer with serialized handshake protocol
 pub async fn get_serialized_handshake<'a>(
@@ -17,12 +17,37 @@ pub async fn get_serialized_handshake<'a>(
         serial_buffer[byte.0] = byte.1.to_owned();
     }
 
+    // let hand = raw::Handshake::default();
+    // hand.deserialize(serial_buffer.to_vec());
+    // println!("deser: {:?}", hand);
     serial_buffer
 }
 
-// pub fn deserialize_handshake(buffer) {
+pub fn deserialize_handshake(buffer: Vec<u8>) -> Handshake {
+    let handshake = raw::Handshake::deserialize(buffer);
 
-// }
+    handshake
+}
+
+pub fn get_serialized_handshake_responce(
+    latency: usize,
+    client_name: String,
+    buffer: &mut [u8; 16],
+) -> [u8; 16] {
+    let responce_packet = raw::HandshakeResponse::new(latency, client_name);
+
+    for byte in responce_packet.serialize().iter().enumerate() {
+        buffer[byte.0] = byte.1.to_owned();
+    }
+
+    *buffer
+}
+
+pub fn deserialize_handshake_responce(buffer: Vec<u8>) -> (String, usize) {
+    let responce = raw::HandshakeResponse::deserialize(buffer);
+
+    (responce.name, responce.latency)
+}
 
 // Used by client, to respond to handshake. This will be recived by the tokio::select!
 // in broadcaster::init_handshake()

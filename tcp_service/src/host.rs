@@ -1,8 +1,8 @@
-use super::protocol_helpers::get_serialized_handshake;
+use super::protocol_helpers::{deserialize_handshake_responce, get_serialized_handshake};
 use super::raw::{ClientLatencies, Host, MessageTypeIO};
 
-use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::io::{AsyncWriteExt, BufWriter};
+use tokio::io::BufReader;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net;
 use tokio::sync::oneshot;
 
@@ -91,32 +91,31 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
 
                 // This thread handles handshaking with client
                 tokio::spawn(async move {
-                    let (read, write) = socket.split();
+                    let (read, mut write) = socket.split();
                     let mut tcp_reader = BufReader::new(read);
-                    let mut responce_buffer = String::new();
+                    let mut responce_buffer = [0u8; 16];
 
                     // send the handshake request
-                    let mut serilized_handshake: [u8; 16] = [0; 16];
+                    let mut serilized_handshake = [0u8; 16];
                     let serilized_handshake = get_serialized_handshake(64, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
-                    println!("serilized_handshake: {:?}", serilized_handshake);
-                    // check if send is actually working
-                    match write.ready(tokio::io::Interest::WRITABLE).await {
-                        Ok(_) => {
-                            let mut write_buffer = BufWriter::new(write);
-                            write_buffer.write_all(serilized_handshake).await.unwrap();
-                            println!("Send handshake");
-                        },
-                        Err(_) => {
-                            // implemented retry logic
-                            eprintln!("Handshake send broke...");
-                        }
-                    }
+
+                    // println!("serilized_handshake: {:?}", serilized_handshake);
+                    write.write_all(&serilized_handshake).await.unwrap();
 
                     // accept handshake responce
                     tokio::select! {
-                        res = tcp_reader.read_line(&mut responce_buffer) => {
-                            let message = res.unwrap();
-                            println!("{}", message);
+                        res = tcp_reader.read(&mut responce_buffer) => {
+                            match res {
+                                Ok(_) => println!("Handshake responce sent"),
+                                Err(err) =>
+                                    println!("Handshake responce failed: {}", err),
+
+                            };
+
+                            // println!("buffer: {:?}", responce_buffer);
+                            let (client_name, _latency) = deserialize_handshake_responce(responce_buffer.to_vec());
+
+                            println!("{} joined the party!", client_name);
                         }
                     }
                 });
