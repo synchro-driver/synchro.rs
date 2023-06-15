@@ -2,7 +2,7 @@ use rmp_serde;
 use serde::{Deserialize, Serialize};
 
 // Set Format as pcm::Format::S16LE in reciver side
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Handshake {
     pub buffer_size: u16,
     pub source: String,
@@ -54,6 +54,10 @@ impl Handshake {
         }
     }
 
+    pub fn default() -> Handshake {
+        Handshake::new(0, "".to_string(), 0, 0, 0)
+    }
+
     pub fn serialize(&self) -> Vec<u8> {
         match rmp_serde::to_vec(&self) {
             Ok(val) => val,
@@ -64,7 +68,7 @@ impl Handshake {
         }
     }
 
-    pub fn deserialize(buffer: Vec<u8>) -> Self {
+    pub fn deserialize(&self, buffer: Vec<u8>) -> Self {
         match rmp_serde::from_slice(&buffer) {
             Ok(val) => val,
             Err(_) => Self::new(0, "none".to_string(), 0, 0, 0),

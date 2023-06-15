@@ -1,3 +1,4 @@
+use super::protocol_helpers::deserialize_handshake;
 use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
 
@@ -7,19 +8,31 @@ pub fn handshake() {
 
     loop {
         // Receive the response from broadcaster
-        let handshake_recvied: bool = false;
+        let mut wating_handshake: bool = true;
         let mut reader = BufReader::new(&stream);
-        let mut buffer = String::new();
+        let mut buffer: Vec<u8> = vec![];
 
-        while handshake_recvied {
-            let bytes_read = reader.read_line(&mut buffer).unwrap();
-            println!("bytes recv: {:?}", buffer);
+        while wating_handshake {
+            let bytes_read = match reader.read_until(0, &mut buffer) {
+                Ok(bytes) => {
+                    if bytes == 15 {
+                        wating_handshake = false;
+                        bytes
+                    } else {
+                        0
+                    }
+                }
+                Err(err) => {
+                    eprintln!("{}", err);
+                    0
+                }
+            };
 
-            if bytes_read == 0 {
-                // connection closed
-                println!("connection closed by host");
-                break;
-            }
+            println!("bytes recv: {:?}:{}", buffer, bytes_read);
         }
+
+        // deseraialize
+        let handshake = deserialize_handshake(buffer);
+        println!("Deser buff: {:?}", handshake);
     }
 }

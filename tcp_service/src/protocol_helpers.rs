@@ -17,12 +17,18 @@ pub async fn get_serialized_handshake<'a>(
         serial_buffer[byte.0] = byte.1.to_owned();
     }
 
+    let hand = raw::Handshake::default();
+    hand.deserialize(serial_buffer.to_vec());
+    println!("deser: {:?}", hand);
     serial_buffer
 }
 
-// pub fn deserialize_handshake(buffer) {
+pub fn deserialize_handshake(buffer: Vec<u8>) -> raw::Handshake {
+    let handshake = raw::Handshake::default();
+    handshake.deserialize(buffer);
 
-// }
+    handshake
+}
 
 // Used by client, to respond to handshake. This will be recived by the tokio::select!
 // in broadcaster::init_handshake()

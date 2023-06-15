@@ -1,8 +1,8 @@
 use super::protocol_helpers::get_serialized_handshake;
 use super::raw::{ClientLatencies, Host, MessageTypeIO};
 
+use tokio::io::AsyncWriteExt;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::io::{AsyncWriteExt, BufWriter};
 use tokio::net;
 use tokio::sync::oneshot;
 
@@ -91,26 +91,29 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
 
                 // This thread handles handshaking with client
                 tokio::spawn(async move {
-                    let (read, write) = socket.split();
+                    let (read, mut write) = socket.split();
                     let mut tcp_reader = BufReader::new(read);
                     let mut responce_buffer = String::new();
 
                     // send the handshake request
                     let mut serilized_handshake: [u8; 16] = [0; 16];
                     let serilized_handshake = get_serialized_handshake(64, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
+
                     println!("serilized_handshake: {:?}", serilized_handshake);
-                    // check if send is actually working
-                    match write.ready(tokio::io::Interest::WRITABLE).await {
-                        Ok(_) => {
-                            let mut write_buffer = BufWriter::new(write);
-                            write_buffer.write_all(serilized_handshake).await.unwrap();
-                            println!("Send handshake");
-                        },
-                        Err(_) => {
-                            // implemented retry logic
-                            eprintln!("Handshake send broke...");
-                        }
-                    }
+                    write.write_all(&serilized_handshake).await.unwrap();
+
+                    // TODO: validate this for proper error handling
+                    // match write.ready(tokio::io::Interest::WRITABLE).await {
+                    //     Ok(_) => {
+                    //         // let mut write_buffer = BufWriter::new(write);
+                    //         // write_buffer.write_all(serilized_handshake).await.unwrap();
+                    //         println!("Send handshake");
+                    //     },
+                    //     Err(_) => {
+                    //         // implemented retry logic
+                    //         eprintln!("Handshake send broke...");
+                    //     }
+                    // }
 
                     // accept handshake responce
                     tokio::select! {
