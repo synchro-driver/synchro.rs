@@ -1,4 +1,4 @@
-use super::protocol_helpers::get_serialized_handshake;
+use super::protocol_helpers::{deserialize_handshake_responce, get_serialized_handshake};
 use super::raw::{ClientLatencies, Host, MessageTypeIO};
 
 use tokio::io::BufReader;
@@ -99,21 +99,8 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
                     let mut serilized_handshake = [0u8; 16];
                     let serilized_handshake = get_serialized_handshake(64, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
 
-                    println!("serilized_handshake: {:?}", serilized_handshake);
+                    // println!("serilized_handshake: {:?}", serilized_handshake);
                     write.write_all(&serilized_handshake).await.unwrap();
-
-                    // TODO: validate this for proper error handling
-                    // match write.ready(tokio::io::Interest::WRITABLE).await {
-                    //     Ok(_) => {
-                    //         // let mut write_buffer = BufWriter::new(write);
-                    //         // write_buffer.write_all(serilized_handshake).await.unwrap();
-                    //         println!("Send handshake");
-                    //     },
-                    //     Err(_) => {
-                    //         // implemented retry logic
-                    //         eprintln!("Handshake send broke...");
-                    //     }
-                    // }
 
                     // accept handshake responce
                     tokio::select! {
@@ -125,7 +112,10 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
 
                             };
 
-                            println!("buffer: {:?}", responce_buffer);
+                            // println!("buffer: {:?}", responce_buffer);
+                            let (client_name, _latency) = deserialize_handshake_responce(responce_buffer.to_vec());
+
+                            println!("{} joined the party!", client_name);
                         }
                     }
                 });

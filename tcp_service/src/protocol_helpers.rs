@@ -43,10 +43,10 @@ pub fn get_serialized_handshake_responce(
     *buffer
 }
 
-pub fn deserialize_handshake_responce(buffer: Vec<u8>) -> HandshakeResponse {
+pub fn deserialize_handshake_responce(buffer: Vec<u8>) -> (String, usize) {
     let responce = raw::HandshakeResponse::deserialize(buffer);
 
-    responce
+    (responce.name, responce.latency)
 }
 
 // Used by client, to respond to handshake. This will be recived by the tokio::select!
