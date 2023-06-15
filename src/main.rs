@@ -2,9 +2,8 @@ extern crate middleware;
 extern crate protocol;
 extern crate tcp_service;
 
-use std::{io, thread};
-// use tcp_service::raw::Host;
-use tcp_service::{client, handshake, host};
+use std::io;
+use tcp_service::{client, host, raw};
 
 fn main() {
     println!("Synchro Studio 🎵");
@@ -25,26 +24,12 @@ fn main() {
     };
 
     if inp_num == 1 {
-        // let broadcaster_thread = thread::spawn(|| {
-        // let mut host = Host::new("localhost".to_string(), 8000, 1000);
-        // broadcaster::init_handshake(&mut host);
-        // });
+        let host = raw::Host::new("127.0.0.1".to_string(), 8000, 1000);
+        let mut client_latencies = raw::ClientLatencies::new();
 
-        println!("Press Enter after all the clients are connected");
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-
-        // let host_thread = thread::spawn(|| {
-        //     // Wait for broadcaster to start
-        //     thread::sleep(Duration::from_millis(100));
-        //     host::stream_flush();
-        // });
-
-        // broadcaster_thread.join().unwrap();
-        // host_thread.join().unwrap();
+        host::init(host, &mut client_latencies);
     } else if inp_num == 2 {
-        client::start();
+        client::handshake();
     } else {
         println!("Invalid input")
     }

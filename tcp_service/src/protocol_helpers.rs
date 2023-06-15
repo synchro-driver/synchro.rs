@@ -20,6 +20,10 @@ pub async fn get_serialized_handshake<'a>(
     serial_buffer
 }
 
+// pub fn deserialize_handshake(buffer) {
+
+// }
+
 // Used by client, to respond to handshake. This will be recived by the tokio::select!
 // in broadcaster::init_handshake()
 pub fn handshake_responce() {}
