@@ -96,7 +96,7 @@ pub async fn init(host: Host, clients: &mut ClientLatencies) {
                     let mut responce_buffer = String::new();
 
                     // send the handshake request
-                    let mut serilized_handshake: [u8; 16] = [0; 16];
+                    let mut serilized_handshake = [0u8; 16];
                     let serilized_handshake = get_serialized_handshake(64, "default".to_string(), 44100, 1, &mut serilized_handshake).await;
 
                     println!("serilized_handshake: {:?}", serilized_handshake);

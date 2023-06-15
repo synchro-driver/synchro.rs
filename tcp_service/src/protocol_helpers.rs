@@ -1,4 +1,4 @@
-use protocol::raw;
+use protocol::raw::{self, Handshake};
 
 // Used to get a buffer writer with serialized handshake protocol
 pub async fn get_serialized_handshake<'a>(
@@ -17,17 +17,19 @@ pub async fn get_serialized_handshake<'a>(
         serial_buffer[byte.0] = byte.1.to_owned();
     }
 
-    let hand = raw::Handshake::default();
-    println!("deser: {:?}", hand);
+    // let hand = raw::Handshake::default();
+    // hand.deserialize(serial_buffer.to_vec());
+    // println!("deser: {:?}", hand);
     serial_buffer
 }
 
-pub fn deserialize_handshake(buffer: Vec<u8>) -> raw::Handshake {
-    let handshake = raw::Handshake::default();
-    handshake.deserialize(buffer);
+pub fn deserialize_handshake(buffer: Vec<u8>) -> Handshake {
+    let handshake = raw::Handshake::deserialize(buffer);
 
     handshake
 }
+
+pub fn get_alsa_workers(config: Handshake) -> () {}
 
 // Used by client, to respond to handshake. This will be recived by the tokio::select!
 // in broadcaster::init_handshake()

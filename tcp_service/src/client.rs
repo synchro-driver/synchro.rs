@@ -19,6 +19,7 @@ pub fn handshake() {
                         wating_handshake = false;
                         bytes
                     } else {
+                        eprintln!("Wrong packet size recived!");
                         0
                     }
                 }
@@ -31,8 +32,10 @@ pub fn handshake() {
             println!("bytes recv: {:?}:{}", buffer, bytes_read);
         }
 
-        // deseraialize
-        let handshake = deserialize_handshake(&stream);
-        println!("Deser buff: {:?}", handshake);
+        let audio_params = deserialize_handshake(buffer);
+        let mut audio_config = audio_params.get_audio_config();
+        let mut audio_stream = audio_params.get_audio_stream();
+
+        audio_params.config_client_audio(&mut audio_config, &mut audio_stream);
     }
 }
