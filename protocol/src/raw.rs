@@ -103,7 +103,11 @@ impl Handshake {
     }
 
     pub fn get_audio_stream(&self) -> AlsaStream {
-        AlsaStream::new("default")
+        AlsaStream::new("default", true)
+    }
+
+    pub fn set_audio_stream(&self) -> AlsaStream {
+        AlsaStream::new("default", false)
     }
 
     pub fn config_client_audio(&self, config: &mut AlsaConfig, stream: &mut AlsaStream) {

@@ -1,4 +1,8 @@
 use crate::raw;
+use serde_json::Result;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 
 // Setup functions
 pub fn set_alsa_config(
@@ -10,8 +14,8 @@ pub fn set_alsa_config(
     raw::AlsaConfig::new(source, channel, sample_rate, frame_size)
 }
 
-pub fn set_alsa_stream(source: &str) -> raw::AlsaStream {
-    raw::AlsaStream::new(source)
+pub fn set_alsa_stream(source: &str, is_input: bool) -> raw::AlsaStream {
+    raw::AlsaStream::new(source, is_input)
 }
 
 // Helper function
@@ -37,10 +41,62 @@ pub fn io_read(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream, termi
 
     // let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
 
+    let mut file = File::create("array.txt").expect("Failed to create file");
+
     // check for the termination condition
     while !terminate {
         raw::AlsaStream::read_from_io(stream);
 
+        // to write to file
+        writeln!(file, "{:?}", stream.stream).expect("Failed to write to file");
+
         // write to protocol buffer
+    }
+}
+
+// Exit point
+pub fn io_write(config: &mut raw::AlsaConfig, stream: &mut raw::AlsaStream, terminate: bool) {
+    initialize_audio_paramters(config, stream);
+
+    // let (buffer_size, period_size) = raw::AlsaStream::get_transfer_size(stream);
+
+    // let mut file = File::create("array.txt").expect("Failed to create file");
+
+    // check for the termination condition
+    // while !terminate {
+    //     raw::AlsaStream::write_to_io(stream);
+
+    //     // to write to file
+    //     // writeln!(file, "{:?}", stream.stream).expect("Failed to write to file");
+
+    //     // write to protocol buffer
+    // }
+
+    let file = File::open("array.txt").expect("Failed to open file");
+    let reader = BufReader::new(file);
+    let read_array: [i16; 1024] = [0; 1024];
+    for (i, line) in reader.lines().enumerate() {
+        if let Ok(line) = line {
+            // println!("Line {}: {}", i, line);
+
+            let input_array: Vec<i16> = match serde_json::from_str(&line) {
+                Ok(v) => v,
+                Err(e) => {
+                    println!("Failed to parse line {}", e);
+                    vec![]
+                }
+            };
+
+            // println!("Input array: {:?}", input_array);
+            let c = input_array.as_slice();
+
+            raw::AlsaStream::write_to_io(stream, c);
+        } else {
+            panic!("Failed to read line {}", i);
+        }
+    }
+
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(1));
     }
 }

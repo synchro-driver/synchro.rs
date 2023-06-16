@@ -2,8 +2,8 @@ use super::protocol_helpers::{deserialize_handshake, get_serialized_handshake_re
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::net::TcpStream;
 
-pub fn handshake(client_name: String) {
-    let stream = TcpStream::connect("127.0.0.1:8000").unwrap();
+pub fn handshake(client_name: String, host_ip: String, host_port: u16) {
+    let stream = TcpStream::connect(format!("{}:{}", host_ip, host_port)).unwrap();
     println!("Connected to server: {}", stream.peer_addr().unwrap());
 
     // Receive the response from broadcaster
@@ -41,7 +41,7 @@ pub fn handshake(client_name: String) {
 
     let audio_params = deserialize_handshake(buffer);
     let mut audio_config = audio_params.get_audio_config();
-    let mut audio_stream = audio_params.get_audio_stream();
+    let mut audio_stream = audio_params.set_audio_stream();
 
     audio_params.config_client_audio(&mut audio_config, &mut audio_stream);
 }

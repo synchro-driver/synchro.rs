@@ -16,7 +16,7 @@ fn main() {
 
     io::stdin()
         .read_line(&mut input)
-        .expect("Failed to read line");
+        .expect("Failed to get server ip");
 
     let inp_num = match input.trim().parse::<i32>() {
         Ok(x) => x,
@@ -24,18 +24,35 @@ fn main() {
     };
 
     if inp_num == 1 {
-        let host = raw::Host::new("127.0.0.1".to_string(), 8000, 1000);
+        let mut server_ip = String::new();
+        println!("Enter server ip: ");
+        io::stdin()
+            .read_line(&mut server_ip)
+            .expect("Failed to get server ip");
+
+        let host = raw::Host::new(server_ip.trim().to_string(), 8000, 1000);
         let mut client_latencies = raw::ClientLatencies::new();
 
         host::init(host, &mut client_latencies);
     } else if inp_num == 2 {
         let mut client_name = String::new();
+        let mut client_ip = String::new();
+
         println!("Enter client name: ");
         io::stdin()
             .read_line(&mut client_name)
             .expect("Failed to get client name");
 
-        client::handshake(client_name.trim().to_string());
+        println!("Enter server ip: ");
+        io::stdin()
+            .read_line(&mut client_ip)
+            .expect("Failed to get server ip");
+
+        client::handshake(
+            client_name.trim().to_string(),
+            client_ip.trim().to_string(),
+            8000,
+        );
     } else {
         println!("Invalid input")
     }
