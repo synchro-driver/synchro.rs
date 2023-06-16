@@ -1,11 +1,12 @@
+use middleware::raw::{AlsaConfig, AlsaStream};
+
 use rmp_serde;
 use serde::{Deserialize, Serialize};
 
 // Set Format as pcm::Format::S16LE in reciver side
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Handshake {
     pub buffer_size: u16,
-    // pub source: &'a str,
     pub source: String,
     pub rate: u32,
     pub channels: u32,
@@ -26,7 +27,7 @@ pub struct Stream {
 
     // pub stream: &'a mut [f64],
     // pub stream: [f64; 1024],
-    pub stream: Vec<f64>,
+    pub stream: Vec<u8>,
 
     // used to check the order in which the packets arrive
     // similar to sliding window, use it with mod(size(u32)) to prevent overflows
@@ -55,7 +56,12 @@ impl Handshake {
         }
     }
 
+    pub fn default() -> Handshake {
+        Handshake::new(0, "".to_string(), 0, 0, 0)
+    }
+
     pub fn serialize(&self) -> Vec<u8> {
+        // MessagePack impl
         match rmp_serde::to_vec(&self) {
             Ok(val) => val,
             Err(_) => {
@@ -66,14 +72,46 @@ impl Handshake {
     }
 
     pub fn deserialize(buffer: Vec<u8>) -> Self {
-        match rmp_serde::from_slice(&buffer) {
-            Ok(val) => val,
-            Err(_) => Self::new(0, "none".to_string(), 0, 0, 0),
+        // MessagePack impl
+        match rmp_serde::from_slice::<Self>(&buffer) {
+            Ok(val) => {
+                println!("Deserialize success");
+                println!("val: {:?}", val);
+                val
+            }
+            Err(err) => {
+                eprintln!("Failed to deserialize: {}", err);
+                Self::default()
+            }
         }
     }
 
     pub fn set_timestamp(&mut self, stamp: u64) {
         self.timestamp = stamp;
+    }
+
+    pub fn set_rate(&mut self, rate: u32) {
+        self.rate = rate;
+    }
+
+    pub fn set_channels(&mut self, channels: u32) {
+        self.channels = channels;
+    }
+
+    pub fn get_audio_config(&self) -> AlsaConfig {
+        AlsaConfig::new("default", self.channels, self.rate, 256)
+    }
+
+    pub fn get_audio_stream(&self) -> AlsaStream {
+        AlsaStream::new("default", true)
+    }
+
+    pub fn set_audio_stream(&self) -> AlsaStream {
+        AlsaStream::new("default", false)
+    }
+
+    pub fn config_client_audio(&self, config: &mut AlsaConfig, stream: &mut AlsaStream) {
+        middleware::core::initialize_audio_paramters(config, stream);
     }
 }
 
@@ -82,7 +120,15 @@ impl HandshakeResponse {
         HandshakeResponse { latency, name }
     }
 
+    pub fn default() -> Self {
+        Self {
+            latency: 0,
+            name: "error".to_string(),
+        }
+    }
+
     pub fn serialize(&self) -> Vec<u8> {
+        // MessagePack
         match rmp_serde::to_vec(&self) {
             Ok(val) => val,
             Err(_) => {
@@ -93,7 +139,8 @@ impl HandshakeResponse {
     }
 
     pub fn deserialize(buffer: Vec<u8>) -> Self {
-        match rmp_serde::from_slice(&buffer) {
+        // MessagePack
+        match rmp_serde::from_slice::<Self>(&buffer) {
             Ok(val) => val,
             Err(_) => Self::new(0, "error".to_string()),
         }
@@ -101,7 +148,7 @@ impl HandshakeResponse {
 }
 
 impl Stream {
-    pub fn new(buffer_size: u16, packet_flag: u32, stream: &[f64]) -> Self {
+    pub fn new(buffer_size: u16, packet_flag: u32, stream: &[u8]) -> Self {
         Stream {
             buffer_size,
             stream: stream.to_vec(),
@@ -109,7 +156,16 @@ impl Stream {
         }
     }
 
+    pub fn default() -> Self {
+        Self {
+            buffer_size: 0,
+            stream: [0].to_vec(),
+            packet_flag: 0,
+        }
+    }
+
     pub fn serialize(&self) -> Vec<u8> {
+        // MessagePack
         match rmp_serde::to_vec(&self) {
             Ok(val) => val,
             Err(_) => {
@@ -119,7 +175,8 @@ impl Stream {
         }
     }
     pub fn deserialize(buffer: Vec<u8>) -> Self {
-        match rmp_serde::from_slice(&buffer) {
+        // MessagePack
+        match rmp_serde::from_slice::<Self>(&buffer) {
             Ok(val) => val,
             Err(_) => Self::new(0, 0, &[]),
         }

@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use alsa::pcm::Format;
 use std::ffi::CString;
 
@@ -12,7 +10,7 @@ pub struct AudioData {
     pub rate: u32,
     pub channels: u32,
     pub source: CString,
-    pub terminate: RefCell<bool>,
+    pub terminate: bool,
 }
 
 // implement all alsa sys-binding calls

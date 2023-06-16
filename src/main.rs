@@ -2,9 +2,8 @@ extern crate middleware;
 extern crate protocol;
 extern crate tcp_service;
 
-use std::{io, thread};
-// use tcp_service::raw::Host;
-use tcp_service::{client, handshake, host};
+use std::io;
+use tcp_service::{client, host, raw};
 
 fn main() {
     println!("Synchro Studio 🎵");
@@ -17,7 +16,7 @@ fn main() {
 
     io::stdin()
         .read_line(&mut input)
-        .expect("Failed to read line");
+        .expect("Failed to get server ip");
 
     let inp_num = match input.trim().parse::<i32>() {
         Ok(x) => x,
@@ -25,26 +24,35 @@ fn main() {
     };
 
     if inp_num == 1 {
-        // let broadcaster_thread = thread::spawn(|| {
-        // let mut host = Host::new("localhost".to_string(), 8000, 1000);
-        // broadcaster::init_handshake(&mut host);
-        // });
+        let mut server_ip = String::new();
+        println!("Enter server ip: ");
+        io::stdin()
+            .read_line(&mut server_ip)
+            .expect("Failed to get server ip");
 
-        println!("Press Enter after all the clients are connected");
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
+        let host = raw::Host::new(server_ip.trim().to_string(), 8000, 1000);
+        let mut client_latencies = raw::ClientLatencies::new();
 
-        // let host_thread = thread::spawn(|| {
-        //     // Wait for broadcaster to start
-        //     thread::sleep(Duration::from_millis(100));
-        //     host::stream_flush();
-        // });
-
-        // broadcaster_thread.join().unwrap();
-        // host_thread.join().unwrap();
+        host::init(host, &mut client_latencies);
     } else if inp_num == 2 {
-        client::start();
+        let mut client_name = String::new();
+        let mut client_ip = String::new();
+
+        println!("Enter client name: ");
+        io::stdin()
+            .read_line(&mut client_name)
+            .expect("Failed to get client name");
+
+        println!("Enter server ip: ");
+        io::stdin()
+            .read_line(&mut client_ip)
+            .expect("Failed to get server ip");
+
+        client::handshake(
+            client_name.trim().to_string(),
+            client_ip.trim().to_string(),
+            8000,
+        );
     } else {
         println!("Invalid input")
     }

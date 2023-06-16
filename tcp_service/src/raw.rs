@@ -42,7 +42,7 @@ impl ClientLatencies {
     }
 
     // Fix this
-    // pub fn update_latency(&mut self, client: SocketAddr, latency: &mut usize) {
-    //     self.clients.get_mut(client).unwrap() = latency;
+    // pub fn update_latency(&mut self, client: &SocketAddr, latency: &mut usize) {
+    //     // self.clients.get_mut(client).unwrap() = latency;
     // }
 }

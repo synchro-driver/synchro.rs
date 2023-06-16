@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::os::unix::thread;
 
 use alsa::pcm::{Access, Format, HwParams, PCM};
 use alsa::{Direction, ValueOr};
@@ -30,26 +31,39 @@ impl AlsaConfig {
 
 pub struct AlsaStream {
     // Default size of frame is 1024
-    pub stream: &'static mut [f64],
+    pub stream: [i16; 1024],
     pub pcm: PCM,
 }
 
 impl AlsaStream {
-    pub fn new(soure: &str) -> AlsaStream {
-        AlsaStream {
-            stream: Self::open_stream_buffer(),
-            pcm: Self::open_capture_device(CString::new(soure).unwrap()),
+    pub fn new(soure: &str, is_input: bool) -> AlsaStream {
+        if is_input {
+            AlsaStream {
+                stream: Self::open_stream_buffer(),
+                pcm: Self::open_capture_device(CString::new(soure).unwrap()),
+            }
+        } else {
+            AlsaStream {
+                stream: Self::open_stream_buffer(),
+                pcm: Self::open_playback_device(CString::new(soure).unwrap()),
+            }
         }
     }
 
-    pub fn open_stream_buffer() -> &'static mut [f64] {
-        let buffer: &mut [f64] = &mut [];
+    pub fn open_stream_buffer() -> [i16; 1024] {
+        let buffer = [0i16; 1024];
 
         buffer
     }
 
     pub fn open_capture_device(source: CString) -> PCM {
         let pcm = PCM::new(source.to_str().unwrap(), Direction::Capture, false).unwrap();
+
+        pcm
+    }
+
+    pub fn open_playback_device(source: CString) -> PCM {
+        let pcm = PCM::new(source.to_str().unwrap(), Direction::Playback, true).unwrap();
 
         pcm
     }
@@ -74,24 +88,28 @@ impl AlsaStream {
     }
 
     pub fn read_from_io(&mut self) {
-        let io_handler = self.pcm.io_f64().unwrap();
+        let io_handler = self.pcm.io_i16().unwrap();
 
-        match io_handler.readi(self.stream) {
+        match io_handler.readi(&mut self.stream) {
             Ok(bytes) => println!("{} bytes read", bytes),
-            Err(_) => {
-                eprintln!("Overflow Occured");
+            Err(err) => {
+                eprintln!("Overflow Occured {}", err);
                 self.pcm.prepare().unwrap();
             }
         };
     }
 
-    pub fn write_to_io(&self) {
-        let io_handler = self.pcm.io_f64().unwrap();
+    pub fn write_to_io(&mut self, stream_arr: &[i16]) {
+        let io_handler = self.pcm.io_i16().unwrap();
 
-        match io_handler.writei(self.stream) {
+        // println!("{:?}", stream_arr);
+
+        // for _ in 0..1 * 44100 {
+        match io_handler.writei(&stream_arr) {
             Ok(bytes) => println!("{} bytes flushed to IO", bytes),
-            Err(_) => eprintln!("Flush Failed!"),
+            Err(err) => eprintln!("Flush Failed! {}", err),
         }
+        // }
     }
 
     pub fn close_capture_device(pcm: PCM) {
